@@ -1,0 +1,123 @@
+{
+    "tasks": {
+            "list": {
+                "page_title": "Tasks",
+                "page_description": "Browse tasks in read-only mode.",
+                "title": "Task List",
+                "description": "Browse tasks and open a task for details."
+            },
+            "detail": {
+                "page_title": "Task Details",
+                "page_description": "View task details in read-only mode.",
+                "title": "Task Details",
+                "description": "View the stored task information.",
+                "back_to_list": "Back to Tasks"
+            },
+            "create": {
+                "page_title": "Create Task",
+                "page_description": "Create a task for the authenticated account.",
+                "title": "Create Task",
+                "description": "Enter the task details.",
+                "title_placeholder": "Task title",
+                "description_placeholder": "Optional description",
+                "due_at_placeholder": "2026-09-22T15:00:00+09:00",
+                "due_at_help": "Use an ISO-8601 date and time with an explicit timezone offset."
+            },
+            "edit": {
+                "page_title": "Edit Task",
+                "page_description": "Edit the descriptive details of this task.",
+                "title": "Edit Task",
+                "description": "Only title, description, priority, and due date can be edited.",
+                "back_to_detail": "Back to Task",
+                "due_at_placeholder": "2026-09-22T15:00:00+09:00",
+                "terminal_message": "Completed and cancelled tasks cannot be edited."
+            },
+            "assignment": {
+                "title": "Assignment",
+                "description": "Assign one active, non-withdrawn user by numeric ID.",
+                "assignee_placeholder": "Assignee user ID"
+            },
+            "lifecycle": {
+                "title": "Lifecycle"
+            },
+            "confirmations": {
+                "complete_title": "Complete task?",
+                "complete_message": "This will mark the task as completed.",
+                "cancel_title": "Cancel task?",
+                "cancel_message": "This will cancel the task."
+            },
+            "messages": {
+                "create_success": "Task created.",
+                "update_success": "Task updated.",
+                "assign_success": "Task assignment updated.",
+                "unassign_success": "Task unassigned.",
+                "start_success": "Task started.",
+                "complete_success": "Task completed.",
+                "cancel_success": "Task cancelled."
+            },
+            "filters": {
+                "status": "Status",
+                "priority": "Priority",
+                "unassigned": "Assignment",
+                "per_page": "Per page",
+                "assignee_id": "Assignee ID",
+                "created_by": "Creator ID",
+                "assignee_id_placeholder": "Assignee ID",
+                "created_by_placeholder": "Creator ID",
+                "id_hint": "Assignee and creator filters accept numeric IDs only.",
+                "all_statuses": "All statuses",
+                "all_priorities": "All priorities",
+                "assignment_all": "All assignments",
+                "unassigned_only": "Unassigned only",
+                "assigned_only": "Assigned only"
+            },
+            "status": {
+                "open": "Open",
+                "in_progress": "In progress",
+                "completed": "Completed",
+                "cancelled": "Cancelled"
+            },
+            "priority": {
+                "low": "Low",
+                "normal": "Normal",
+                "high": "High",
+                "urgent": "Urgent"
+            },
+            "fields": {
+                "id": "ID",
+                "title": "Title",
+                "description": "Description",
+                "status": "Status",
+                "priority": "Priority",
+                "created_by": "Creator ID",
+                "assignee_id": "Assignee ID",
+                "due_at": "Due at",
+                "started_at": "Started at",
+                "completed_at": "Completed at",
+                "created_at": "Created at",
+                "updated_at": "Updated at"
+            },
+            "actions": {
+                "view": "View",
+                "create": "Create task",
+                "edit": "Edit",
+                "assign": "Assign",
+                "unassign": "Unassign",
+                "start": "Start",
+                "complete": "Complete",
+                "cancel": "Cancel"
+            },
+            "pagination": {
+                "per_page": "{{count}} per page"
+            },
+            "empty": "No tasks found.",
+            "errors": {
+                "load_failed": "Unable to load this task.",
+                "validation_failed": "Please correct the highlighted fields.",
+                "generic": "The task could not be saved.",
+                "update_failed": "The task update failed. Refresh and try again.",
+                "assignment_failed": "The assignment change failed. Refresh and try again.",
+                "operation_failed": "The task operation failed. Refresh and try again."
+            }
+    }
+}

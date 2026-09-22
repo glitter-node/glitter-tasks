@@ -1,0 +1,11 @@
+{
+    "editor": {
+        "data_source": {
+            "tasks": "Tasks",
+            "task": "Task"
+        }
+    },
+    "admin": {
+        "$partial": "partial/en/admin.json"
+    }
+}

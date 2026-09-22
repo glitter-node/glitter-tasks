@@ -1,0 +1,37 @@
+{
+    "version": "1.0.0",
+    "routes": [
+        {
+            "path": "*/admin/tasks",
+            "layout": "admin_tasks_list",
+            "auth_required": true,
+            "meta": {
+                "title": "$t:glitter-tasks.admin.tasks.list.page_title"
+            }
+        },
+        {
+            "path": "*/admin/tasks/create",
+            "layout": "admin_tasks_create",
+            "auth_required": true,
+            "meta": {
+                "title": "$t:glitter-tasks.admin.tasks.create.page_title"
+            }
+        },
+        {
+            "path": "*/admin/tasks/:id",
+            "layout": "admin_tasks_detail",
+            "auth_required": true,
+            "meta": {
+                "title": "$t:glitter-tasks.admin.tasks.detail.page_title"
+            }
+        },
+        {
+            "path": "*/admin/tasks/:id/edit",
+            "layout": "admin_tasks_edit",
+            "auth_required": true,
+            "meta": {
+                "title": "$t:glitter-tasks.admin.tasks.edit.page_title"
+            }
+        }
+    ]
+}

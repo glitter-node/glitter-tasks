@@ -1,0 +1,145 @@
+{
+  "version": "1.0.0",
+  "layout_name": "admin_tasks_detail",
+  "permissions": ["glitter-tasks.tasks.read"],
+  "extends": "_admin_base",
+  "meta": {
+    "title": "$t:glitter-tasks.admin.tasks.detail.page_title",
+    "description": "$t:glitter-tasks.admin.tasks.detail.page_description"
+  },
+  "transition_overlay": {"wait_for": ["task"]},
+  "data_sources": [
+    {
+      "id": "task",
+      "label_key": "$t:glitter-tasks.editor.data_source.task",
+      "type": "api",
+      "endpoint": "/api/modules/glitter-tasks/admin/tasks/{{route?.id}}",
+      "method": "GET",
+      "auto_fetch": true,
+      "auth_required": true,
+      "errorHandling": {
+        "403": {"handler": "showErrorPage", "params": {"target": "content"}},
+        "404": {"handler": "showErrorPage", "params": {"target": "content"}}
+      },
+      "fallback": {"data": null}
+    }
+  ],
+  "modals": [
+    {
+      "id": "completeTaskModal",
+      "type": "composite",
+      "name": "Modal",
+      "permissions": ["glitter-tasks.tasks.transition"],
+      "props": {"title": "$t:glitter-tasks.admin.tasks.confirmations.complete_title", "size": "sm"},
+      "children": [
+        {"type": "basic", "name": "P", "text": "$t:glitter-tasks.admin.tasks.confirmations.complete_message"},
+        {
+          "type": "basic", "name": "Div", "props": {"className": "modal-footer-buttons mt-6"}, "children": [
+            {"type": "basic", "name": "Button", "props": {"className": "btn btn-secondary", "disabled": "{{_global.taskOperationPending}}"}, "actions": [{"type": "click", "handler": "closeModal"}], "text": "$t:common.cancel"},
+            {
+              "type": "basic", "name": "Button", "props": {"className": "btn btn-primary", "disabled": "{{_global.taskOperationPending}}"}, "text": "$t:glitter-tasks.admin.tasks.actions.complete", "actions": [{"type": "click", "handler": "sequence", "params": {"actions": [
+                {"handler": "setState", "params": {"target": "global", "taskOperationPending": true}},
+                {"handler": "apiCall", "auth_required": true, "target": "/api/modules/glitter-tasks/admin/tasks/{{route?.id}}/complete", "params": {"method": "POST"}, "onSuccess": [
+                  {"handler": "closeModal"},
+                  {"handler": "setState", "params": {"target": "global", "taskOperationPending": false}},
+                  {"handler": "toast", "params": {"type": "success", "message": "$t:glitter-tasks.admin.tasks.messages.complete_success"}},
+                  {"handler": "refetchDataSource", "params": {"dataSourceId": "task"}}
+                ], "onError": [
+                  {"handler": "setState", "params": {"target": "global", "taskOperationPending": false}},
+                  {"handler": "toast", "params": {"type": "error", "message": "{{error.message ?? '$t:glitter-tasks.admin.tasks.errors.operation_failed'}}"}},
+                  {"handler": "refetchDataSource", "params": {"dataSourceId": "task"}}
+                ]}
+              ]}}]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cancelTaskModal",
+      "type": "composite",
+      "name": "Modal",
+      "permissions": ["glitter-tasks.tasks.transition"],
+      "props": {"title": "$t:glitter-tasks.admin.tasks.confirmations.cancel_title", "size": "sm"},
+      "children": [
+        {"type": "basic", "name": "P", "text": "$t:glitter-tasks.admin.tasks.confirmations.cancel_message"},
+        {
+          "type": "basic", "name": "Div", "props": {"className": "modal-footer-buttons mt-6"}, "children": [
+            {"type": "basic", "name": "Button", "props": {"className": "btn btn-secondary", "disabled": "{{_global.taskOperationPending}}"}, "actions": [{"type": "click", "handler": "closeModal"}], "text": "$t:common.cancel"},
+            {
+              "type": "basic", "name": "Button", "props": {"className": "btn btn-danger", "disabled": "{{_global.taskOperationPending}}"}, "text": "$t:glitter-tasks.admin.tasks.actions.cancel", "actions": [{"type": "click", "handler": "sequence", "params": {"actions": [
+                {"handler": "setState", "params": {"target": "global", "taskOperationPending": true}},
+                {"handler": "apiCall", "auth_required": true, "target": "/api/modules/glitter-tasks/admin/tasks/{{route?.id}}/cancel", "params": {"method": "POST"}, "onSuccess": [
+                  {"handler": "closeModal"},
+                  {"handler": "setState", "params": {"target": "global", "taskOperationPending": false}},
+                  {"handler": "toast", "params": {"type": "success", "message": "$t:glitter-tasks.admin.tasks.messages.cancel_success"}},
+                  {"handler": "refetchDataSource", "params": {"dataSourceId": "task"}}
+                ], "onError": [
+                  {"handler": "setState", "params": {"target": "global", "taskOperationPending": false}},
+                  {"handler": "toast", "params": {"type": "error", "message": "{{error.message ?? '$t:glitter-tasks.admin.tasks.errors.operation_failed'}}"}},
+                  {"handler": "refetchDataSource", "params": {"dataSourceId": "task"}}
+                ]}
+              ]}}]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "slots": {
+    "content": [
+      {
+        "id": "task_detail_content", "type": "basic", "name": "Div", "props": {"className": "admin-page-content-fluid"}, "children": [
+          {
+            "id": "task_detail_header", "type": "composite", "name": "PageHeader", "props": {
+              "title": "$t:glitter-tasks.admin.tasks.detail.title", "description": "$t:glitter-tasks.admin.tasks.detail.description", "backLink": "/admin/tasks", "backLinkText": "$t:glitter-tasks.admin.tasks.detail.back_to_list"
+            }, "children": [
+              {"type": "basic", "name": "Button", "permissions": ["glitter-tasks.tasks.update"], "if": "{{task?.data?.status !== 'completed' && task?.data?.status !== 'cancelled'}}", "props": {"className": "btn btn-primary"}, "actions": [{"type": "click", "handler": "navigate", "params": {"path": "/admin/tasks/{{route?.id}}/edit", "mergeQuery": true, "query": {}}}], "text": "$t:glitter-tasks.admin.tasks.actions.edit"},
+              {"type": "basic", "name": "Button", "props": {"className": "btn btn-secondary"}, "actions": [{"type": "click", "handler": "navigate", "params": {"path": "/admin/tasks", "mergeQuery": true, "query": {}}}], "text": "$t:glitter-tasks.admin.tasks.detail.back_to_list"}
+            ]
+          },
+          {"id": "task_detail_error", "type": "composite", "name": "Alert", "if": "{{_dataSourceErrors?.task}}", "props": {"type": "error", "message": "{{_dataSourceErrors?.task?.message ?? '$t:glitter-tasks.admin.tasks.errors.load_failed'}}", "className": "mb-6"}},
+          {
+            "id": "task_detail_card", "type": "basic", "name": "Div", "if": "{{task?.data}}", "props": {"className": "admin-card"}, "children": [
+              {"type": "basic", "name": "H2", "props": {"className": "text-primary text-xl font-bold mb-6"}, "text": "{{task?.data?.title ?? '-'}}"},
+              {"type": "basic", "name": "Div", "props": {"className": "grid grid-cols-1 md:grid-cols-2 gap-6"}, "children": [
+                {"type": "basic", "name": "Div", "children": [{"type": "basic", "name": "Span", "text": "$t:glitter-tasks.admin.tasks.fields.id"}, {"type": "basic", "name": "P", "text": "{{task?.data?.id ?? '-'}}"}]},
+                {"type": "basic", "name": "Div", "children": [{"type": "basic", "name": "Span", "text": "$t:glitter-tasks.admin.tasks.fields.status"}, {"type": "basic", "name": "P", "text": "$t:glitter-tasks.admin.tasks.status.{{task?.data?.status ?? ''}}"}]},
+                {"type": "basic", "name": "Div", "children": [{"type": "basic", "name": "Span", "text": "$t:glitter-tasks.admin.tasks.fields.priority"}, {"type": "basic", "name": "P", "text": "$t:glitter-tasks.admin.tasks.priority.{{task?.data?.priority ?? ''}}"}]},
+                {"type": "basic", "name": "Div", "children": [{"type": "basic", "name": "Span", "text": "$t:glitter-tasks.admin.tasks.fields.description"}, {"type": "basic", "name": "P", "text": "{{task?.data?.description ?? '-'}}"}]},
+                {"type": "basic", "name": "Div", "children": [{"type": "basic", "name": "Span", "text": "$t:glitter-tasks.admin.tasks.fields.created_by"}, {"type": "basic", "name": "P", "text": "{{task?.data?.created_by ?? '-'}}"}]},
+                {"type": "basic", "name": "Div", "children": [{"type": "basic", "name": "Span", "text": "$t:glitter-tasks.admin.tasks.fields.assignee_id"}, {"type": "basic", "name": "P", "text": "{{task?.data?.assignee_id ?? '-'}}"}]},
+                {"type": "basic", "name": "Div", "children": [{"type": "basic", "name": "Span", "text": "$t:glitter-tasks.admin.tasks.fields.due_at"}, {"type": "basic", "name": "P", "text": "{{task?.data?.due_at ?? '-'}}"}]},
+                {"type": "basic", "name": "Div", "children": [{"type": "basic", "name": "Span", "text": "$t:glitter-tasks.admin.tasks.fields.started_at"}, {"type": "basic", "name": "P", "text": "{{task?.data?.started_at ?? '-'}}"}]},
+                {"type": "basic", "name": "Div", "children": [{"type": "basic", "name": "Span", "text": "$t:glitter-tasks.admin.tasks.fields.completed_at"}, {"type": "basic", "name": "P", "text": "{{task?.data?.completed_at ?? '-'}}"}]},
+                {"type": "basic", "name": "Div", "children": [{"type": "basic", "name": "Span", "text": "$t:glitter-tasks.admin.tasks.fields.created_at"}, {"type": "basic", "name": "P", "text": "{{task?.data?.created_at ?? '-'}}"}]},
+                {"type": "basic", "name": "Div", "children": [{"type": "basic", "name": "Span", "text": "$t:glitter-tasks.admin.tasks.fields.updated_at"}, {"type": "basic", "name": "P", "text": "{{task?.data?.updated_at ?? '-'}}"}]}
+              ]}
+            ]
+          },
+          {
+            "id": "task_assignment_card", "type": "basic", "name": "Div", "permissions": ["glitter-tasks.tasks.assign"], "if": "{{task?.data && (task?.data?.status === 'open' || task?.data?.status === 'in_progress')}}", "props": {"className": "admin-card mt-6"}, "children": [
+              {"type": "basic", "name": "H3", "text": "$t:glitter-tasks.admin.tasks.assignment.title"},
+              {"type": "basic", "name": "P", "props": {"className": "card-description"}, "text": "$t:glitter-tasks.admin.tasks.assignment.description"},
+              {"type": "basic", "name": "Div", "props": {"className": "flex flex-wrap gap-3 mt-4"}, "children": [
+                {"type": "basic", "name": "Input", "props": {"type": "number", "min": 1, "value": "{{_local.assigneeId ?? task?.data?.assignee_id ?? ''}}", "placeholder": "$t:glitter-tasks.admin.tasks.assignment.assignee_placeholder", "disabled": "{{_global.assignmentPending}}", "className": "w-full md:w-64"}, "actions": [{"type": "change", "handler": "setState", "params": {"target": "local", "assigneeId": "{{$event.target.value}}"}}]},
+                {"type": "basic", "name": "Button", "props": {"className": "btn btn-primary", "disabled": "{{_global.assignmentPending || !(_local.assigneeId ?? task?.data?.assignee_id)}}"}, "actions": [{"type": "click", "handler": "sequence", "params": {"actions": [{"handler": "setState", "params": {"target": "global", "assignmentPending": true}}, {"handler": "apiCall", "auth_required": true, "target": "/api/modules/glitter-tasks/admin/tasks/{{route?.id}}/assign", "params": {"method": "POST", "body": {"assignee_id": "{{Number(_local.assigneeId ?? task?.data?.assignee_id)}}"}}, "onSuccess": [{"handler": "setState", "params": {"target": "global", "assignmentPending": false}}, {"handler": "setState", "params": {"target": "local", "assigneeId": "{{response?.data?.assignee_id ?? _local.assigneeId}}"}}, {"handler": "toast", "params": {"type": "success", "message": "$t:glitter-tasks.admin.tasks.messages.assign_success"}}, {"handler": "refetchDataSource", "params": {"dataSourceId": "task"}}], "onError": [{"handler": "setState", "params": {"target": "global", "assignmentPending": false}}, {"handler": "toast", "params": {"type": "error", "message": "{{error.message ?? '$t:glitter-tasks.admin.tasks.errors.assignment_failed'}}"}}, {"handler": "refetchDataSource", "params": {"dataSourceId": "task"}}]}]}}], "text": "$t:glitter-tasks.admin.tasks.actions.assign"},
+                {"type": "basic", "name": "Button", "if": "{{task?.data?.assignee_id !== null && task?.data?.assignee_id !== undefined}}", "props": {"className": "btn btn-secondary", "disabled": "{{_global.assignmentPending}}"}, "actions": [{"type": "click", "handler": "sequence", "params": {"actions": [{"handler": "setState", "params": {"target": "global", "assignmentPending": true}}, {"handler": "apiCall", "auth_required": true, "target": "/api/modules/glitter-tasks/admin/tasks/{{route?.id}}/unassign", "params": {"method": "POST"}, "onSuccess": [{"handler": "setState", "params": {"target": "global", "assignmentPending": false}}, {"handler": "setState", "params": {"target": "local", "assigneeId": ""}}, {"handler": "toast", "params": {"type": "success", "message": "$t:glitter-tasks.admin.tasks.messages.unassign_success"}}, {"handler": "refetchDataSource", "params": {"dataSourceId": "task"}}], "onError": [{"handler": "setState", "params": {"target": "global", "assignmentPending": false}}, {"handler": "toast", "params": {"type": "error", "message": "{{error.message ?? '$t:glitter-tasks.admin.tasks.errors.assignment_failed'}}"}}, {"handler": "refetchDataSource", "params": {"dataSourceId": "task"}}]}]}}], "text": "$t:glitter-tasks.admin.tasks.actions.unassign"}
+              ]}
+            ]
+          },
+          {
+            "id": "task_lifecycle_card", "type": "basic", "name": "Div", "permissions": ["glitter-tasks.tasks.transition"], "if": "{{task?.data && (task?.data?.status === 'open' || task?.data?.status === 'in_progress')}}", "props": {"className": "admin-card mt-6"}, "children": [
+              {"type": "basic", "name": "H3", "text": "$t:glitter-tasks.admin.tasks.lifecycle.title"},
+              {"type": "basic", "name": "Div", "props": {"className": "flex flex-wrap gap-3 mt-4"}, "children": [
+                {"type": "basic", "name": "Button", "if": "{{task?.data?.status === 'open'}}", "props": {"className": "btn btn-primary", "disabled": "{{_global.taskOperationPending}}"}, "actions": [{"type": "click", "handler": "sequence", "params": {"actions": [{"handler": "setState", "params": {"target": "global", "taskOperationPending": true}}, {"handler": "apiCall", "auth_required": true, "target": "/api/modules/glitter-tasks/admin/tasks/{{route?.id}}/start", "params": {"method": "POST"}, "onSuccess": [{"handler": "setState", "params": {"target": "global", "taskOperationPending": false}}, {"handler": "toast", "params": {"type": "success", "message": "$t:glitter-tasks.admin.tasks.messages.start_success"}}, {"handler": "refetchDataSource", "params": {"dataSourceId": "task"}}], "onError": [{"handler": "setState", "params": {"target": "global", "taskOperationPending": false}}, {"handler": "toast", "params": {"type": "error", "message": "{{error.message ?? '$t:glitter-tasks.admin.tasks.errors.operation_failed'}}"}}, {"handler": "refetchDataSource", "params": {"dataSourceId": "task"}}]}]}}], "text": "$t:glitter-tasks.admin.tasks.actions.start"},
+                {"type": "basic", "name": "Button", "if": "{{task?.data?.status === 'in_progress'}}", "props": {"className": "btn btn-primary", "disabled": "{{_global.taskOperationPending}}"}, "actions": [{"type": "click", "handler": "openModal", "target": "completeTaskModal"}], "text": "$t:glitter-tasks.admin.tasks.actions.complete"},
+                {"type": "basic", "name": "Button", "props": {"className": "btn btn-danger", "disabled": "{{_global.taskOperationPending}}"}, "actions": [{"type": "click", "handler": "openModal", "target": "cancelTaskModal"}], "text": "$t:glitter-tasks.admin.tasks.actions.cancel"}
+              ]}
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
