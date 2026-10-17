@@ -1,0 +1,435 @@
+{
+    "version": "1.0.0",
+    "layout_name": "admin_tasks_edit",
+    "permissions": [
+        "glitter-tasks.tasks.read",
+        "glitter-tasks.tasks.update"
+    ],
+    "extends": "_admin_base",
+    "meta": {
+        "title": "$t:glitter-tasks.admin.tasks.edit.page_title",
+        "description": "$t:glitter-tasks.admin.tasks.edit.page_description"
+    },
+    "transition_overlay": {
+        "wait_for": [
+            "task"
+        ]
+    },
+    "data_sources": [
+        {
+            "id": "task",
+            "label_key": "$t:glitter-tasks.editor.data_source.task",
+            "type": "api",
+            "endpoint": "/api/modules/glitter-tasks/admin/tasks/{{route?.id}}",
+            "method": "GET",
+            "auto_fetch": true,
+            "auth_required": true,
+            "errorHandling": {
+                "403": {
+                    "handler": "showErrorPage",
+                    "params": {
+                        "target": "content"
+                    }
+                },
+                "404": {
+                    "handler": "showErrorPage",
+                    "params": {
+                        "target": "content"
+                    }
+                }
+            },
+            "fallback": {
+                "data": null
+            }
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "id": "task_edit_content",
+                "type": "basic",
+                "name": "Div",
+                "props": {
+                    "className": "admin-page-content-responsive-fluid"
+                },
+                "children": [
+                    {
+                        "type": "composite",
+                        "name": "PageHeader",
+                        "props": {
+                            "title": "$t:glitter-tasks.admin.tasks.edit.title",
+                            "description": "$t:glitter-tasks.admin.tasks.edit.description",
+                            "backLink": "/admin/tasks/{{route?.id}}",
+                            "backLinkText": "$t:glitter-tasks.admin.tasks.edit.back_to_detail"
+                        }
+                    },
+                    {
+                        "type": "basic",
+                        "name": "Div",
+                        "if": "{{task?.data?.status === 'completed' || task?.data?.status === 'cancelled'}}",
+                        "props": {
+                            "className": "alert-warning mb-6"
+                        },
+                        "text": "$t:glitter-tasks.admin.tasks.edit.terminal_message"
+                    },
+                    {
+                        "type": "basic",
+                        "name": "Div",
+                        "if": "{{_local.errors && Object.keys(_local.errors).length > 0}}",
+                        "props": {
+                            "className": "alert-danger mb-6"
+                        },
+                        "children": [
+                            {
+                                "type": "basic",
+                                "name": "P",
+                                "text": "{{_local.errors?.title?.[0] ?? _local.errors?.description?.[0] ?? _local.errors?.priority?.[0] ?? _local.errors?.due_at?.[0] ?? _local.errors?.message ?? '$t:glitter-tasks.admin.tasks.errors.validation_failed'}}"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "basic",
+                        "name": "Div",
+                        "if": "{{task?.data && task?.data?.status !== 'completed' && task?.data?.status !== 'cancelled'}}",
+                        "props": {
+                            "className": "admin-card"
+                        },
+                        "children": [
+                            {
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "space-y-5"
+                                },
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "text": "$t:glitter-tasks.admin.tasks.fields.title",
+                                                "props": {
+                                                    "className": "form-label-muted"
+                                                }
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                    "type": "text",
+                                                    "value": "{{_local.form?.title ?? task?.data?.title ?? ''}}",
+                                                    "className": "w-full"
+                                                },
+                                                "actions": [
+                                                    {
+                                                        "type": "change",
+                                                        "handler": "setState",
+                                                        "params": {
+                                                            "target": "local",
+                                                            "form.title": "{{$event.target.value}}"
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "text": "$t:glitter-tasks.admin.tasks.fields.description",
+                                                "props": {
+                                                    "className": "form-label-muted"
+                                                }
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Textarea",
+                                                "props": {
+                                                    "value": "{{_local.form?.description ?? task?.data?.description ?? ''}}",
+                                                    "rows": 5,
+                                                    "className": "w-full"
+                                                },
+                                                "actions": [
+                                                    {
+                                                        "type": "change",
+                                                        "handler": "setState",
+                                                        "params": {
+                                                            "target": "local",
+                                                            "form.description": "{{$event.target.value}}"
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "text": "$t:glitter-tasks.admin.tasks.fields.priority",
+                                                "props": {
+                                                    "className": "form-label-muted"
+                                                }
+                                            },
+                                            {
+                                                "type": "composite",
+                                                "name": "Select",
+                                                "props": {
+                                                    "value": "{{_local.form?.priority ?? task?.data?.priority ?? 'normal'}}",
+                                                    "className": "w-full",
+                                                    "options": [
+                                                        {
+                                                            "label": "$t:glitter-tasks.admin.tasks.priority.low",
+                                                            "value": "low"
+                                                        },
+                                                        {
+                                                            "label": "$t:glitter-tasks.admin.tasks.priority.normal",
+                                                            "value": "normal"
+                                                        },
+                                                        {
+                                                            "label": "$t:glitter-tasks.admin.tasks.priority.high",
+                                                            "value": "high"
+                                                        },
+                                                        {
+                                                            "label": "$t:glitter-tasks.admin.tasks.priority.urgent",
+                                                            "value": "urgent"
+                                                        }
+                                                    ]
+                                                },
+                                                "actions": [
+                                                    {
+                                                        "type": "change",
+                                                        "handler": "setState",
+                                                        "params": {
+                                                            "target": "local",
+                                                            "form.priority": "{{$event.target.value}}"
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "text": "$t:glitter-tasks.admin.tasks.fields.due_at",
+                                                "props": {
+                                                    "className": "form-label-muted"
+                                                }
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                    "type": "text",
+                                                    "value": "{{_local.form?.due_at ?? task?.data?.due_at ?? ''}}",
+                                                    "placeholder": "$t:glitter-tasks.admin.tasks.edit.due_at_placeholder",
+                                                    "className": "w-full"
+                                                },
+                                                "actions": [
+                                                    {
+                                                        "type": "change",
+                                                        "handler": "setState",
+                                                        "params": {
+                                                            "target": "local",
+                                                            "form.due_at": "{{$event.target.value}}",
+                                                            "dueAtTouched": true
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "sticky-footer-buttons mt-6"
+                                },
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "Button",
+                                        "props": {
+                                            "type": "button",
+                                            "className": "btn btn-secondary"
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "click",
+                                                "handler": "navigate",
+                                                "params": {
+                                                    "path": "/admin/tasks/{{route?.id}}",
+                                                    "mergeQuery": true,
+                                                    "query": {}
+                                                }
+                                            }
+                                        ],
+                                        "text": "$t:common.cancel"
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Button",
+                                        "props": {
+                                            "type": "button",
+                                            "className": "btn btn-primary",
+                                            "disabled": "{{_local.saving}}"
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "click",
+                                                "handler": "sequence",
+                                                "params": {
+                                                    "actions": [
+                                                        {
+                                                            "handler": "setState",
+                                                            "params": {
+                                                                "target": "local",
+                                                                "saving": true,
+                                                                "errors": null
+                                                            }
+                                                        },
+                                                        {
+                                                            "handler": "conditions",
+                                                            "conditions": [
+                                                                {
+                                                                    "if": "{{_local.dueAtTouched && String(_local.form?.due_at ?? '').trim() !== '' && !(String(_local.form?.due_at ?? '').trim().slice(-1) === 'Z' || (['+', '-'].includes(String(_local.form?.due_at ?? '').trim().slice(-6, -5)) && String(_local.form?.due_at ?? '').trim().slice(-3, -2) === ':'))}}",
+                                                                    "then": {
+                                                                        "handler": "sequence",
+                                                                        "params": {
+                                                                            "actions": [
+                                                                                {
+                                                                                    "handler": "setState",
+                                                                                    "params": {
+                                                                                        "target": "local",
+                                                                                        "saving": false,
+                                                                                        "errors": {
+                                                                                            "message": "$t:glitter-tasks.admin.tasks.errors.validation_failed"
+                                                                                        }
+                                                                                    }
+                                                                                },
+                                                                                {
+                                                                                    "handler": "toast",
+                                                                                    "params": {
+                                                                                        "type": "error",
+                                                                                        "message": "$t:glitter-tasks.admin.tasks.errors.validation_failed"
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    }
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "handler": "apiCall",
+                                                            "if": "{{!(_local.dueAtTouched && String(_local.form?.due_at ?? '').trim() !== '' && !(String(_local.form?.due_at ?? '').trim().slice(-1) === 'Z' || (['+', '-'].includes(String(_local.form?.due_at ?? '').trim().slice(-6, -5)) && String(_local.form?.due_at ?? '').trim().slice(-3, -2) === ':')))}}",
+                                                            "auth_required": true,
+                                                            "target": "/api/modules/glitter-tasks/admin/tasks/{{route?.id}}",
+                                                            "params": {
+                                                                "method": "PATCH",
+                                                                    "body": "{{Object.assign({}, {title: _local.form?.title ?? task?.data?.title, description: String(_local.form?.description ?? task?.data?.description ?? '').trim() || null, priority: _local.form?.priority ?? task?.data?.priority}, _local.dueAtTouched ? {due_at: String(_local.form?.due_at ?? '').trim() || null} : {})}}"
+                                                            },
+                                                            "onSuccess": [
+                                                                {
+                                                                    "handler": "setState",
+                                                                    "params": {
+                                                                        "target": "local",
+                                                                        "saving": false
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "handler": "toast",
+                                                                    "params": {
+                                                                        "type": "success",
+                                                                        "message": "$t:glitter-tasks.admin.tasks.messages.update_success"
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "handler": "navigate",
+                                                                    "params": {
+                                                                        "path": "/admin/tasks/{{route?.id}}",
+                                                                        "mergeQuery": true,
+                                                                        "query": {}
+                                                                    }
+                                                                }
+                                                            ],
+                                                            "onError": [
+                                                                {
+                                                                    "handler": "setState",
+                                                                    "params": {
+                                                                        "target": "local",
+                                                                        "saving": false,
+                                                                        "errors": "{{error.errors ?? {message: error.message}}}"
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "handler": "toast",
+                                                                    "params": {
+                                                                        "type": "error",
+                                                                        "message": "{{error.message ?? '$t:glitter-tasks.admin.tasks.errors.update_failed'}}"
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "handler": "conditions",
+                                                                        "conditions": [
+                                                                            {
+                                                                                "if": "{{error.status === 409 || error.status === 422}}",
+                                                                                "then": [
+                                                                                    {
+                                                                                        "handler": "refetchDataSource",
+                                                                                        "params": {
+                                                                                            "dataSourceId": "task"
+                                                                                        }
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                        ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ],
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Icon",
+                                                "if": "{{_local.saving}}",
+                                                "props": {
+                                                    "name": "spinner",
+                                                    "className": "spinner-sm"
+                                                }
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "text": "{{_local.saving ? '$t:common.saving' : '$t:common.save'}}"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

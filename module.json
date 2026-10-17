@@ -1,0 +1,19 @@
+{
+    "identifier": "glitter-tasks",
+    "vendor": "Glitter.kr",
+    "name": {
+        "ko": "Glitter Tasks",
+        "en": "Glitter Tasks"
+    },
+  "version": "0.13.0",
+    "license": "MIT",
+    "description": {
+        "ko": "업무 생성, 할당, 추적, 완료를 위한 범용 운영 작업 관리 모듈",
+        "en": "Generic operational task management for creating, assigning, tracking, and completing human work"
+    },
+    "g7_version": ">=7.0.11",
+    "dependencies": {
+        "modules": {},
+        "plugins": {}
+    }
+}

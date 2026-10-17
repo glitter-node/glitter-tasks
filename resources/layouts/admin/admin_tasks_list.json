@@ -1,0 +1,508 @@
+{
+    "version": "1.0.0",
+    "layout_name": "admin_tasks_list",
+    "permissions": [
+        "glitter-tasks.tasks.read"
+    ],
+    "extends": "_admin_base",
+    "meta": {
+        "title": "$t:glitter-tasks.admin.tasks.list.page_title",
+        "description": "$t:glitter-tasks.admin.tasks.list.page_description"
+    },
+    "transition_overlay": {
+        "wait_for": [
+            "tasks"
+        ]
+    },
+    "data_sources": [
+        {
+            "id": "tasks",
+            "label_key": "$t:glitter-tasks.editor.data_source.tasks",
+            "type": "api",
+            "endpoint": "/api/modules/glitter-tasks/admin/tasks",
+            "method": "GET",
+            "auto_fetch": true,
+            "auth_required": true,
+            "errorHandling": {
+                "403": {
+                    "handler": "showErrorPage",
+                    "params": {
+                        "target": "content"
+                    }
+                }
+            },
+            "params": {
+                "status": "{{query.status}}",
+                "priority": "{{query.priority}}",
+                "assignee_id": "{{query.assignee_id}}",
+                "unassigned": "{{query.unassigned}}",
+                "created_by": "{{query.created_by}}",
+                "page": "{{query.page}}",
+                "per_page": "{{query.per_page}}"
+            },
+            "fallback": {
+                "data": [],
+                "meta": {
+                    "current_page": 1,
+                    "last_page": 1,
+                    "per_page": 20,
+                    "total": 0,
+                    "has_more_pages": false
+                }
+            }
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "id": "task_list_content",
+                "type": "basic",
+                "name": "Div",
+                "props": {
+                    "className": "admin-page-content-fluid"
+                },
+                "children": [
+                    {
+                        "id": "task_page_header",
+                        "type": "composite",
+                        "name": "PageHeader",
+                        "props": {
+                            "title": "$t:glitter-tasks.admin.tasks.list.title",
+                            "description": "$t:glitter-tasks.admin.tasks.list.description"
+                        },
+                        "children": [
+                            {
+                                "type": "basic",
+                                "name": "Button",
+                                "permissions": [
+                                    "glitter-tasks.tasks.create"
+                                ],
+                                "props": {
+                                    "className": "btn btn-primary"
+                                },
+                                "actions": [
+                                    {
+                                        "type": "click",
+                                        "handler": "navigate",
+                                        "params": {
+                                            "path": "/admin/tasks/create",
+                                            "mergeQuery": true,
+                                            "query": {}
+                                        }
+                                    }
+                                ],
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "Icon",
+                                        "props": {
+                                            "name": "plus",
+                                            "size": "sm"
+                                        }
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Span",
+                                        "text": "$t:glitter-tasks.admin.tasks.actions.create"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id": "task_filters",
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                            "className": "admin-card mb-6"
+                        },
+                        "children": [
+                            {
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3"
+                                },
+                                "children": [
+                                    {
+                                        "type": "composite",
+                                        "name": "Select",
+                                        "props": {
+                                            "value": "{{query.status ?? ''}}",
+                                            "aria-label": "$t:glitter-tasks.admin.tasks.filters.status",
+                                            "className": "w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm",
+                                            "options": [
+                                                {
+                                                    "label": "$t:glitter-tasks.admin.tasks.filters.all_statuses",
+                                                    "value": ""
+                                                },
+                                                {
+                                                    "label": "$t:glitter-tasks.admin.tasks.status.open",
+                                                    "value": "open"
+                                                },
+                                                {
+                                                    "label": "$t:glitter-tasks.admin.tasks.status.in_progress",
+                                                    "value": "in_progress"
+                                                },
+                                                {
+                                                    "label": "$t:glitter-tasks.admin.tasks.status.completed",
+                                                    "value": "completed"
+                                                },
+                                                {
+                                                    "label": "$t:glitter-tasks.admin.tasks.status.cancelled",
+                                                    "value": "cancelled"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "change",
+                                                "handler": "navigate",
+                                                "params": {
+                                                    "path": "/admin/tasks",
+                                                    "mergeQuery": true,
+                                                    "replace": true,
+                                                    "query": {
+                                                        "status": "{{$event.target.value}}",
+                                                        "page": 1
+                                                    },
+                                                    "transition_overlay_target": "tasks_grid__body"
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "composite",
+                                        "name": "Select",
+                                        "props": {
+                                            "value": "{{query.priority ?? ''}}",
+                                            "aria-label": "$t:glitter-tasks.admin.tasks.filters.priority",
+                                            "className": "w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm",
+                                            "options": [
+                                                {
+                                                    "label": "$t:glitter-tasks.admin.tasks.filters.all_priorities",
+                                                    "value": ""
+                                                },
+                                                {
+                                                    "label": "$t:glitter-tasks.admin.tasks.priority.low",
+                                                    "value": "low"
+                                                },
+                                                {
+                                                    "label": "$t:glitter-tasks.admin.tasks.priority.normal",
+                                                    "value": "normal"
+                                                },
+                                                {
+                                                    "label": "$t:glitter-tasks.admin.tasks.priority.high",
+                                                    "value": "high"
+                                                },
+                                                {
+                                                    "label": "$t:glitter-tasks.admin.tasks.priority.urgent",
+                                                    "value": "urgent"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "change",
+                                                "handler": "navigate",
+                                                "params": {
+                                                    "path": "/admin/tasks",
+                                                    "mergeQuery": true,
+                                                    "replace": true,
+                                                    "query": {
+                                                        "priority": "{{$event.target.value}}",
+                                                        "page": 1
+                                                    },
+                                                    "transition_overlay_target": "tasks_grid__body"
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "composite",
+                                        "name": "Select",
+                                        "props": {
+                                            "value": "{{query.unassigned ?? ''}}",
+                                            "aria-label": "$t:glitter-tasks.admin.tasks.filters.unassigned",
+                                            "className": "w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm",
+                                            "options": [
+                                                {
+                                                    "label": "$t:glitter-tasks.admin.tasks.filters.assignment_all",
+                                                    "value": ""
+                                                },
+                                                {
+                                                    "label": "$t:glitter-tasks.admin.tasks.filters.unassigned_only",
+                                                    "value": "true"
+                                                },
+                                                {
+                                                    "label": "$t:glitter-tasks.admin.tasks.filters.assigned_only",
+                                                    "value": "false"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "change",
+                                                "handler": "navigate",
+                                                "params": {
+                                                    "path": "/admin/tasks",
+                                                    "mergeQuery": true,
+                                                    "replace": true,
+                                                    "query": {
+                                                        "unassigned": "{{$event.target.value}}",
+                                                        "assignee_id": "{{$event.target.value === 'true' ? '' : query.assignee_id}}",
+                                                        "page": 1
+                                                    },
+                                                    "transition_overlay_target": "tasks_grid__body"
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "composite",
+                                        "name": "Select",
+                                        "props": {
+                                            "value": "{{query.per_page || '20'}}",
+                                            "aria-label": "$t:glitter-tasks.admin.tasks.filters.per_page",
+                                            "className": "w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm",
+                                            "options": [
+                                                {
+                                                    "label": "$t:glitter-tasks.admin.tasks.pagination.per_page|count=10",
+                                                    "value": "10"
+                                                },
+                                                {
+                                                    "label": "$t:glitter-tasks.admin.tasks.pagination.per_page|count=20",
+                                                    "value": "20"
+                                                },
+                                                {
+                                                    "label": "$t:glitter-tasks.admin.tasks.pagination.per_page|count=50",
+                                                    "value": "50"
+                                                },
+                                                {
+                                                    "label": "$t:glitter-tasks.admin.tasks.pagination.per_page|count=100",
+                                                    "value": "100"
+                                                }
+                                            ]
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "change",
+                                                "handler": "navigate",
+                                                "params": {
+                                                    "path": "/admin/tasks",
+                                                    "mergeQuery": true,
+                                                    "replace": true,
+                                                    "query": {
+                                                        "per_page": "{{$event.target.value}}",
+                                                        "page": 1
+                                                    },
+                                                    "transition_overlay_target": "tasks_grid__body"
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Input",
+                                        "props": {
+                                            "type": "number",
+                                            "min": 1,
+                                            "value": "{{query.assignee_id ?? ''}}",
+                                            "placeholder": "$t:glitter-tasks.admin.tasks.filters.assignee_id_placeholder",
+                                            "aria-label": "$t:glitter-tasks.admin.tasks.filters.assignee_id",
+                                            "disabled": "{{query.unassigned === 'true' || query.unassigned === '1'}}",
+                                            "className": "w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm"
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "keypress",
+                                                "key": "Enter",
+                                                "handler": "navigate",
+                                                "params": {
+                                                    "path": "/admin/tasks",
+                                                    "mergeQuery": true,
+                                                    "replace": true,
+                                                    "query": {
+                                                        "assignee_id": "{{$event.target.value}}",
+                                                        "page": 1
+                                                    },
+                                                    "transition_overlay_target": "tasks_grid__body"
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Input",
+                                        "props": {
+                                            "type": "number",
+                                            "min": 1,
+                                            "value": "{{query.created_by ?? ''}}",
+                                            "placeholder": "$t:glitter-tasks.admin.tasks.filters.created_by_placeholder",
+                                            "aria-label": "$t:glitter-tasks.admin.tasks.filters.created_by",
+                                            "className": "w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm"
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "keypress",
+                                                "key": "Enter",
+                                                "handler": "navigate",
+                                                "params": {
+                                                    "path": "/admin/tasks",
+                                                    "mergeQuery": true,
+                                                    "replace": true,
+                                                    "query": {
+                                                        "created_by": "{{$event.target.value}}",
+                                                        "page": 1
+                                                    },
+                                                    "transition_overlay_target": "tasks_grid__body"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "name": "P",
+                                "props": {
+                                    "className": "text-xs text-label-subtle mt-3"
+                                },
+                                "text": "$t:glitter-tasks.admin.tasks.filters.id_hint"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "tasks_api_error",
+                        "type": "composite",
+                        "name": "Alert",
+                        "if": "{{_dataSourceErrors?.tasks}}",
+                        "props": {
+                            "type": "error",
+                            "message": "{{_dataSourceErrors?.tasks?.message ?? '$t:glitter-tasks.admin.tasks.errors.load_failed'}}",
+                            "className": "mb-6"
+                        }
+                    },
+                    {
+                        "id": "tasks_grid",
+                        "type": "composite",
+                        "name": "DataGrid",
+                        "blur_until_loaded": true,
+                        "props": {
+                            "data": "{{tasks?.data?.data ?? []}}",
+                            "columns": [
+                                {
+                                    "field": "title",
+                                    "header": "$t:glitter-tasks.admin.tasks.fields.title",
+                                    "sortable": false,
+                                    "required": true,
+                                    "cellChildren": [
+                                        {
+                                            "type": "basic",
+                                            "name": "Span",
+                                            "props": {
+                                                "className": "font-medium text-primary"
+                                            },
+                                            "text": "{{row.title ?? '-'}}"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "field": "status",
+                                    "header": "$t:glitter-tasks.admin.tasks.fields.status",
+                                    "sortable": false,
+                                    "cellChildren": [
+                                        {
+                                            "type": "basic",
+                                            "name": "Span",
+                                            "text": "$t:glitter-tasks.admin.tasks.status.{{row.status ?? ''}}"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "field": "priority",
+                                    "header": "$t:glitter-tasks.admin.tasks.fields.priority",
+                                    "sortable": false,
+                                    "cellChildren": [
+                                        {
+                                            "type": "basic",
+                                            "name": "Span",
+                                            "text": "$t:glitter-tasks.admin.tasks.priority.{{row.priority ?? ''}}"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "field": "assignee_id",
+                                    "header": "$t:glitter-tasks.admin.tasks.fields.assignee_id",
+                                    "sortable": false
+                                },
+                                {
+                                    "field": "created_by",
+                                    "header": "$t:glitter-tasks.admin.tasks.fields.created_by",
+                                    "sortable": false
+                                },
+                                {
+                                    "field": "due_at",
+                                    "header": "$t:glitter-tasks.admin.tasks.fields.due_at",
+                                    "sortable": false
+                                },
+                                {
+                                    "field": "created_at",
+                                    "header": "$t:glitter-tasks.admin.tasks.fields.created_at",
+                                    "sortable": false
+                                }
+                            ],
+                            "pagination": true,
+                            "alwaysShowPagination": true,
+                            "pageSize": 20,
+                            "serverSidePagination": true,
+                            "serverCurrentPage": "{{tasks?.data?.meta?.current_page ?? 1}}",
+                            "serverTotalPages": "{{tasks?.data?.meta?.last_page ?? null}}",
+                            "serverHasMorePages": "{{tasks?.data?.meta?.has_more_pages ?? false}}",
+                            "emptyMessage": "$t:glitter-tasks.admin.tasks.empty",
+                            "rowActions": [
+                                {
+                                    "id": "view",
+                                    "label": "$t:glitter-tasks.admin.tasks.actions.view",
+                                    "iconName": "eye"
+                                }
+                            ],
+                            "actionsColumnHeader": "$t:common.actions"
+                        },
+                        "actions": [
+                            {
+                                "event": "onPageChange",
+                                "type": "change",
+                                "handler": "navigate",
+                                "params": {
+                                    "path": "/admin/tasks",
+                                    "mergeQuery": true,
+                                    "replace": true,
+                                    "query": {
+                                        "page": "{{$args[0]}}"
+                                    },
+                                    "transition_overlay_target": "tasks_grid__body"
+                                }
+                            },
+                            {
+                                "event": "onRowAction",
+                                "type": "action",
+                                "handler": "switch",
+                                "cases": {
+                                    "view": {
+                                        "handler": "navigate",
+                                        "params": {
+                                            "path": "/admin/tasks/{{$args[1].id}}",
+                                            "mergeQuery": true,
+                                            "query": {}
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}
